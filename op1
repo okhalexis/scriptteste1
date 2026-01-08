@@ -1,7 +1,7 @@
 local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
 
 --------------------------------------------------------------------------------
--- CONFIGURAÇÃO DA JANELA
+-- 1. CONFIGURAÇÃO DA JANELA (HUB)
 --------------------------------------------------------------------------------
 local Window = OrionLib:MakeWindow({
     Name = "Khalexis Hub V2.0", 
@@ -13,108 +13,122 @@ local Window = OrionLib:MakeWindow({
 })
 
 --------------------------------------------------------------------------------
--- TAB 1: PESQUISA (SISTEMA DE FILTRO)
+-- 2. CRIANDO AS CATEGORIAS (ABAS)
 --------------------------------------------------------------------------------
--- Esta aba serve como a "Home" onde fica a barra de pesquisa.
-local SearchTab = Window:MakeTab({
-    Name = "Pesquisa",
-    Icon = "rbxassetid://4483345998", -- Icone de Lupa/Home
-    PremiumOnly = false
-})
+-- OBS: Criamos a aba, mas não adicionamos botões dentro dela ainda, conforme pedido.
 
-SearchTab:AddSection({
-    Name = "Filtro de Categorias"
-})
-
--- Função para atualizar a visibilidade das abas (Categorias) na Sidebar
-local function UpdateSidebarFilter(text)
-    local query = text:lower()
-    
-    -- Tenta encontrar a UI do Orion na CoreGui
-    local coreGui = game:GetService("CoreGui")
-    local orionUI = coreGui:FindFirstChild("Orion")
-    
-    if orionUI then
-        -- O caminho exato pode variar levemente dependendo da versão do Orion, 
-        -- mas geralmente os botões das abas ficam em um Container -> Frame de rolagem.
-        -- Vamos procurar recursivamente por botões que tenham o nome das nossas abas.
-        
-        for _, obj in pairs(orionUI:GetDescendants()) do
-            -- Identifica se é um botão de aba (geralmente tem um TabLabel ou nome específico)
-            if obj:IsA("TextButton") and obj:FindFirstChild("TabLabel") then
-                local categoryName = obj.TabLabel.Text:lower()
-                
-                -- Regra: Sempre manter a aba 'Pesquisa' visível
-                if categoryName == "pesquisa" then
-                    obj.Visible = true
-                else
-                    -- Lógica de filtro: Se começa com o texto digitado, mostra. Senão, esconde.
-                    if categoryName:sub(1, #query) == query then
-                        obj.Visible = true
-                    else
-                        obj.Visible = false
-                    end
-                end
-            end
-        end
-    end
-end
-
-SearchTab:AddTextbox({
-    Name = "Pesquisar categoria...",
-    Default = "",
-    TextDisappear = false,
-    Callback = function(Value)
-        UpdateSidebarFilter(Value)
-    end
-})
-
-SearchTab:AddParagraph("Informação", "Digite acima para filtrar as categorias na barra lateral esquerda.")
-
---------------------------------------------------------------------------------
--- TAB 2: CATEGORIA - STEAL A BRAINROT
---------------------------------------------------------------------------------
 local BrainrotTab = Window:MakeTab({
     Name = "Steal a Brainrot",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
 
-BrainrotTab:AddSection({
-    Name = "Scripts Principais"
+-- Adicionamos apenas uma seção vazia para organizar visualmente
+local BrainrotSection = BrainrotTab:AddSection({
+    Name = "Lista de Scripts"
 })
 
--- Script 1
-BrainrotTab:AddButton({
-    Name = "Auto Farm (Exemplo)",
-    Callback = function()
-        print("Script executado!")
-    end    
-})
--- ID Mascarado
-BrainrotTab:AddLabel("Usuário") 
-
--- Script 2
-BrainrotTab:AddButton({
-    Name = "ESP Player / Items",
-    Callback = function()
-        print("ESP Ativado")
-    end    
-})
--- ID Mascarado
-BrainrotTab:AddLabel("Usuário") 
-
--- Script 3
-BrainrotTab:AddButton({
-    Name = "Infinite Cash (Visual)",
-    Callback = function()
-        print("Cash infinito")
-    end    
-})
--- ID Mascarado
-BrainrotTab:AddLabel("Usuário") 
 
 --------------------------------------------------------------------------------
--- FINALIZAÇÃO
+-- 3. INJEÇÃO DA BARRA DE PESQUISA (Lógica Avançada)
+--------------------------------------------------------------------------------
+-- Esta função cria a TextBox preta no topo da lista lateral manualmente.
+
+local function InjectSearchBar()
+    task.wait(1) -- Aguarda a interface do Orion carregar completamente
+    
+    local CoreGui = game:GetService("CoreGui")
+    local OrionUI = CoreGui:FindFirstChild("Orion")
+    
+    if not OrionUI then return end
+
+    -- Localiza o container onde ficam os botões das abas
+    -- Procuramos pelo botão da nossa aba criada para achar o pai correto (Sidebar)
+    local TabContainer = nil
+    for _, v in pairs(OrionUI:GetDescendants()) do
+        if v:IsA("TextButton") and v:FindFirstChild("TabLabel") then
+            if v.TabLabel.Text == "Steal a Brainrot" then
+                TabContainer = v.Parent
+                break
+            end
+        end
+    end
+
+    if TabContainer then
+        -- Cria o Frame de Fundo da Barra de Pesquisa
+        local SearchFrame = Instance.new("Frame")
+        SearchFrame.Name = "CustomSearchFrame"
+        SearchFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        SearchFrame.BackgroundTransparency = 1
+        SearchFrame.Size = UDim2.new(1, -20, 0, 40) -- Largura total menos margem, altura 40
+        SearchFrame.Position = UDim2.new(0, 10, 0, 0)
+        
+        -- Garante que a barra de pesquisa fique no topo
+        SearchFrame.LayoutOrder = -1 
+        
+        -- Adiciona espaço entre a barra e os botões
+        local Padding = Instance.new("UIPadding")
+        Padding.PaddingTop = UDim.new(0, 10)
+        Padding.PaddingBottom = UDim.new(0, 10)
+        Padding.Parent = SearchFrame
+
+        -- Cria a TextBox (Caixa de Digitação)
+        local TextBox = Instance.new("TextBox")
+        TextBox.Name = "SearchInput"
+        TextBox.Parent = SearchFrame
+        TextBox.Size = UDim2.new(1, 0, 1, 0)
+        TextBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Fundo Preto/Cinza Escuro (conforme pedido)
+        TextBox.TextColor3 = Color3.fromRGB(200, 200, 200)
+        TextBox.PlaceholderText = "Pesquisar..."
+        TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
+        TextBox.Font = Enum.Font.GothamBold
+        TextBox.TextSize = 14
+        TextBox.Text = ""
+        TextBox.BorderSizePixel = 0
+        
+        -- Arredondamento (Estilo Pílula da imagem)
+        local UICorner = Instance.new("UICorner")
+        UICorner.CornerRadius = UDim.new(1, 0) -- Máximo arredondamento
+        UICorner.Parent = TextBox
+        
+        -- Borda Fina (Estilo Visual)
+        local UIStroke = Instance.new("UIStroke")
+        UIStroke.Parent = TextBox
+        UIStroke.Color = Color3.fromRGB(60, 60, 60)
+        UIStroke.Thickness = 1
+        UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+        -- Inserir a SearchBar no Menu Lateral do Orion
+        SearchFrame.Parent = TabContainer
+
+        -- >>>>> LÓGICA DE FILTRAGEM <<<<<
+        TextBox:GetPropertyChangedSignal("Text"):Connect(function()
+            local input = TextBox.Text:lower()
+            
+            -- Varre todos os botões de abas que são irmãos da nossa SearchBar
+            for _, item in pairs(TabContainer:GetChildren()) do
+                -- Verifica se é um botão de Aba (não a SearchBar nem o UIListLayout)
+                if item:IsA("TextButton") and item:FindFirstChild("TabLabel") then
+                    local name = item.TabLabel.Text:lower()
+                    
+                    -- Lógica: Verifica se o nome COMEÇA com o texto digitado
+                    if input == "" or string.sub(name, 1, #input) == input then
+                        item.Visible = true
+                    else
+                        item.Visible = false
+                    end
+                end
+            end
+        end)
+    else
+        warn("Não foi possível encontrar o container lateral do Orion UI.")
+    end
+end
+
+--------------------------------------------------------------------------------
+-- 4. INICIALIZAÇÃO
 --------------------------------------------------------------------------------
 OrionLib:Init()
+
+-- Chama a função de injeção após a library iniciar
+coroutine.wrap(InjectSearchBar)()
