@@ -13,122 +13,126 @@ local Window = OrionLib:MakeWindow({
 })
 
 --------------------------------------------------------------------------------
--- 2. CRIANDO AS CATEGORIAS (ABAS)
+-- 2. CRIANDO AS CATEGORIAS (VAZIAS)
 --------------------------------------------------------------------------------
--- OBS: Criamos a aba, mas não adicionamos botões dentro dela ainda, conforme pedido.
 
-local BrainrotTab = Window:MakeTab({
+-- Categoria 1: Steal a Brainrot
+local Tab1 = Window:MakeTab({
     Name = "Steal a Brainrot",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
+-- Não adicionei Section nem Buttons aqui. Está vazia.
 
--- Adicionamos apenas uma seção vazia para organizar visualmente
-local BrainrotSection = BrainrotTab:AddSection({
-    Name = "Lista de Scripts"
+-- Categoria 2: 99 Nights in the Florest
+local Tab2 = Window:MakeTab({
+    Name = "99 Nights in the Florest",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
 })
-
+-- Também totalmente vazia.
 
 --------------------------------------------------------------------------------
--- 3. INJEÇÃO DA BARRA DE PESQUISA (Lógica Avançada)
+-- 3. INJEÇÃO AVANÇADA DA TEXTBOX (NO TOPO)
 --------------------------------------------------------------------------------
--- Esta função cria a TextBox preta no topo da lista lateral manualmente.
+-- Esta função cria a Textbox manualmente e a joga para o topo da lista
 
 local function InjectSearchBar()
-    task.wait(1) -- Aguarda a interface do Orion carregar completamente
+    task.wait(0.5) -- Espera um momento para a UI do Orion ser criada
     
     local CoreGui = game:GetService("CoreGui")
     local OrionUI = CoreGui:FindFirstChild("Orion")
     
     if not OrionUI then return end
 
-    -- Localiza o container onde ficam os botões das abas
-    -- Procuramos pelo botão da nossa aba criada para achar o pai correto (Sidebar)
+    -- Localiza o container (Frame) onde ficam os botões das abas
     local TabContainer = nil
+    
+    -- Varremos a UI para encontrar o botão da nossa aba criada
     for _, v in pairs(OrionUI:GetDescendants()) do
         if v:IsA("TextButton") and v:FindFirstChild("TabLabel") then
-            if v.TabLabel.Text == "Steal a Brainrot" then
-                TabContainer = v.Parent
-                break
-            end
+            -- Encontramos um botão de aba, então o PAI dele é o container que queremos
+            TabContainer = v.Parent
+            break
         end
     end
 
     if TabContainer then
-        -- Cria o Frame de Fundo da Barra de Pesquisa
-        local SearchFrame = Instance.new("Frame")
-        SearchFrame.Name = "CustomSearchFrame"
-        SearchFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        SearchFrame.BackgroundTransparency = 1
-        SearchFrame.Size = UDim2.new(1, -20, 0, 40) -- Largura total menos margem, altura 40
-        SearchFrame.Position = UDim2.new(0, 10, 0, 0)
+        -------------------------------------------------------------
+        -- CRIAÇÃO DO CONTAINER DA PESQUISA
+        -------------------------------------------------------------
+        local SearchContainer = Instance.new("Frame")
+        SearchContainer.Name = "SearchContainer"
+        SearchContainer.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- Transparente
+        SearchContainer.BackgroundTransparency = 1
+        SearchContainer.Size = UDim2.new(1, -24, 0, 35) -- Altura da caixa
+        SearchContainer.Parent = TabContainer
         
-        -- Garante que a barra de pesquisa fique no topo
-        SearchFrame.LayoutOrder = -1 
-        
-        -- Adiciona espaço entre a barra e os botões
-        local Padding = Instance.new("UIPadding")
-        Padding.PaddingTop = UDim.new(0, 10)
-        Padding.PaddingBottom = UDim.new(0, 10)
-        Padding.Parent = SearchFrame
+        -- MÁGICA: O LayoutOrder negativo joga esse elemento para CIMA de tudo na lista
+        SearchContainer.LayoutOrder = -5 
 
-        -- Cria a TextBox (Caixa de Digitação)
-        local TextBox = Instance.new("TextBox")
-        TextBox.Name = "SearchInput"
-        TextBox.Parent = SearchFrame
-        TextBox.Size = UDim2.new(1, 0, 1, 0)
-        TextBox.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Fundo Preto/Cinza Escuro (conforme pedido)
-        TextBox.TextColor3 = Color3.fromRGB(200, 200, 200)
-        TextBox.PlaceholderText = "Pesquisar..."
-        TextBox.PlaceholderColor3 = Color3.fromRGB(100, 100, 100)
-        TextBox.Font = Enum.Font.GothamBold
-        TextBox.TextSize = 14
-        TextBox.Text = ""
-        TextBox.BorderSizePixel = 0
+        -- Espaçamento para não grudar nos lados
+        local Padding = Instance.new("UIPadding")
+        Padding.PaddingTop = UDim.new(0, 5)
+        Padding.PaddingBottom = UDim.new(0, 5)
+        Padding.PaddingLeft = UDim.new(0, 5)
+        Padding.Parent = SearchContainer
+
+        -------------------------------------------------------------
+        -- CRIAÇÃO DA TEXTBOX (PRETA COM ARREDONDAMENTO)
+        -------------------------------------------------------------
+        local RealTextBox = Instance.new("TextBox")
+        RealTextBox.Name = "SearchBoxInput"
+        RealTextBox.Parent = SearchContainer
+        RealTextBox.Size = UDim2.new(1, 0, 1, 0) -- Ocupa todo o espaço do container
         
-        -- Arredondamento (Estilo Pílula da imagem)
+        -- Design
+        RealTextBox.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Fundo PRETO/CINZA MUITO ESCURO
+        RealTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+        RealTextBox.PlaceholderText = "Pesquisa"
+        RealTextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+        RealTextBox.Text = ""
+        RealTextBox.Font = Enum.Font.GothamBold
+        RealTextBox.TextSize = 14
+        
+        -- Borda Arredondada (Pílula)
         local UICorner = Instance.new("UICorner")
-        UICorner.CornerRadius = UDim.new(1, 0) -- Máximo arredondamento
-        UICorner.Parent = TextBox
+        UICorner.CornerRadius = UDim.new(0, 16) -- Arredondamento
+        UICorner.Parent = RealTextBox
         
-        -- Borda Fina (Estilo Visual)
+        -- Borda Fina
         local UIStroke = Instance.new("UIStroke")
-        UIStroke.Parent = TextBox
-        UIStroke.Color = Color3.fromRGB(60, 60, 60)
+        UIStroke.Parent = RealTextBox
+        UIStroke.Color = Color3.fromRGB(50, 50, 50)
         UIStroke.Thickness = 1
         UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-        -- Inserir a SearchBar no Menu Lateral do Orion
-        SearchFrame.Parent = TabContainer
-
-        -- >>>>> LÓGICA DE FILTRAGEM <<<<<
-        TextBox:GetPropertyChangedSignal("Text"):Connect(function()
-            local input = TextBox.Text:lower()
+        -------------------------------------------------------------
+        -- LÓGICA DE FILTRAGEM
+        -------------------------------------------------------------
+        RealTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+            local input = RealTextBox.Text:lower()
             
-            -- Varre todos os botões de abas que são irmãos da nossa SearchBar
-            for _, item in pairs(TabContainer:GetChildren()) do
-                -- Verifica se é um botão de Aba (não a SearchBar nem o UIListLayout)
-                if item:IsA("TextButton") and item:FindFirstChild("TabLabel") then
-                    local name = item.TabLabel.Text:lower()
+            -- Pega todos os itens que estão junto com a search bar (os botões das abas)
+            for _, child in pairs(TabContainer:GetChildren()) do
+                -- Checa se é um botão de Aba (ignora UIListLayout e nossa SearchBar)
+                if child:IsA("TextButton") and child:FindFirstChild("TabLabel") then
+                    local tabName = child.TabLabel.Text:lower()
                     
-                    -- Lógica: Verifica se o nome COMEÇA com o texto digitado
-                    if input == "" or string.sub(name, 1, #input) == input then
-                        item.Visible = true
+                    -- Se o input estiver vazio OU o nome da aba começar com o input
+                    if input == "" or string.sub(tabName, 1, #input) == input then
+                        child.Visible = true
                     else
-                        item.Visible = false
+                        child.Visible = false
                     end
                 end
             end
         end)
-    else
-        warn("Não foi possível encontrar o container lateral do Orion UI.")
     end
 end
 
---------------------------------------------------------------------------------
--- 4. INICIALIZAÇÃO
---------------------------------------------------------------------------------
+-- Inicializa o Hub
 OrionLib:Init()
 
--- Chama a função de injeção após a library iniciar
+-- Executa a criação da barra de pesquisa logo após carregar
 coroutine.wrap(InjectSearchBar)()
