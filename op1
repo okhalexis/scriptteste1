@@ -1,201 +1,233 @@
 --[[
-    KLS HUB - Powered by WindUI
-    Criado com base na documentação fornecida.
+    KLS HUB - Developer Build (Anti-Cheat Testing)
+    Author: KLS Team
+    System: WindUI Latest
 ]]
 
--- 1. Carregar a Library (Latest Version)
 local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
 
--- 2. Configurações Iniciais da UI
-WindUI:SetNotificationLower(true) -- Notificações na parte inferior
+-- 1. Configurações de Notificação
+WindUI:SetNotificationLower(true)
 
--- 3. Criar a Janela Principal
-local Window = WindUI:CreateWindow({
-    Title = "KLS HUB", -- Nome do Hub
-    Icon = "swords", -- Ícone (Lucide Icons)
-    Author = "KLS Team",
-    Folder = "KLSHub", -- Pasta para salvar configs
+-- =================================================================
+-- TEMA CUSTOMIZADO (KLS DARK - Com Gradiente)
+-- =================================================================
+
+-- Criando o objeto de Gradiente baseado no seu exemplo
+local KLSGradient = WindUI:Gradient({                                                      
+    ["0"] = { Color = Color3.fromHex("#1f1f23"), Transparency = 0 },            
+    ["100"] = { Color = Color3.fromHex("#18181b"), Transparency = 0 },      
+}, {                                                                            
+    Rotation = 45, -- Rotacionei um pouco para ficar mais elegante
+})
+
+WindUI:AddTheme({
+    Name = "KLS Dark",
     
-    Size = UDim2.fromOffset(580, 460),
-    Transparent = true, -- Fundo translúcido
-    Theme = "Dark", -- Tema padrão
-    SideBarWidth = 170,
-    HideSearchBar = false,
+    -- Cores Principais
+    Accent = KLSGradient, -- Aplicando o gradiente no destaque
+    Background = Color3.fromHex("#101010"),
+    BackgroundTransparency = 0,
+    Outline = Color3.fromHex("#333333"), -- Suavizei o outline (branco puro fica muito forte)
+    Text = Color3.fromHex("#FFFFFF"),
+    Placeholder = Color3.fromHex("#7a7a7a"),
+    Button = Color3.fromHex("#27272a"), -- Ajuste leve para contraste
+    Icon = Color3.fromHex("#a1a1aa"),
+    
+    Hover = Color3.fromHex("#3f3f46"),
+    
+    -- Janela Principal
+    WindowBackground = Color3.fromHex("#101010"),
+    WindowShadow = Color3.fromHex("#000000"),
+    
+    -- Topbar (Barra superior)
+    WindowTopbarButtonIcon = Color3.fromHex("#a1a1aa"),
+    WindowTopbarTitle = Color3.fromHex("#FFFFFF"),
+    WindowTopbarAuthor = Color3.fromHex("#a1a1aa"),
+    WindowTopbarIcon = Color3.fromHex("#FFFFFF"),
+    
+    -- Abas (Tabs)
+    TabBackground = Color3.fromHex("#101010"), -- Ajustado para combinar com o fundo
+    TabTitle = Color3.fromHex("#FFFFFF"),
+    TabIcon = Color3.fromHex("#a1a1aa"),
+    
+    -- Elementos (Botões, Sections)
+    ElementBackground = Color3.fromHex("#18181b"),
+    ElementTitle = Color3.fromHex("#FFFFFF"),
+    ElementDesc = Color3.fromHex("#a1a1aa"),
+    ElementIcon = Color3.fromHex("#a1a1aa"),
+    
+    -- Popups
+    PopupBackground = Color3.fromHex("#101010"),
+    PopupBackgroundTransparency = 0,
+    PopupTitle = Color3.fromHex("#FFFFFF"),
+    PopupContent = Color3.fromHex("#FFFFFF"),
+    PopupIcon = Color3.fromHex("#a1a1aa"),
+    
+    -- Dialogs
+    DialogBackground = Color3.fromHex("#101010"),
+    DialogBackgroundTransparency = 0,
+    DialogTitle = Color3.fromHex("#FFFFFF"),
+    DialogContent = Color3.fromHex("#FFFFFF"),
+    DialogIcon = Color3.fromHex("#a1a1aa"),
+    
+    -- Inputs Específicos
+    Toggle = Color3.fromHex("#52525b"),
+    ToggleBar = Color3.fromHex("#FFFFFF"),
+    
+    Checkbox = Color3.fromHex("#52525b"),
+    CheckboxIcon = Color3.fromHex("#FFFFFF"),
+    
+    Slider = Color3.fromHex("#52525b"),
+    SliderThumb = Color3.fromHex("#FFFFFF"),
+})
+
+-- Aplicar o tema imediatamente antes de criar a janela
+WindUI:SetTheme("KLS Dark")
+
+-- =================================================================
+-- CRIAÇÃO DA JANELA
+-- =================================================================
+
+local Window = WindUI:CreateWindow({
+    Title = "KLS HUB // ADMIN PANEL",
+    Icon = "shield-check", -- Ícone de segurança/admin
+    Author = "Dev Team",
+    Folder = "KLS_Admin",
+    Size = UDim2.fromOffset(600, 450),
+    Transparent = true, 
+    Theme = "KLS Dark", -- Garante que inicie com o tema
     Resizable = true,
+    SideBarWidth = 180,
+    HideSearchBar = false
 })
 
--- 4. Criando as Abas (Tabs)
-local HomeTab = Window:Tab({ Title = "Início", Icon = "home" })
-local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
-local VisualsTab = Window:Tab({ Title = "Visuais", Icon = "eye" })
-local SettingsTab = Window:Tab({ Title = "Configurações", Icon = "settings" })
+-- =================================================================
+-- ABAS E FUNÇÕES (TESTE DE ANTI-CHEAT)
+-- =================================================================
 
--- ==========================================
--- ABA: INÍCIO (HOME)
--- ==========================================
-HomeTab:Section({ Title = "Informações" })
+local PhysicsTab = Window:Tab({ Title = "Physics Test", Icon = "zap" })
+local VisualsTab = Window:Tab({ Title = "Render Test", Icon = "eye" })
+local SettingsTab = Window:Tab({ Title = "Settings", Icon = "settings" })
 
-HomeTab:Paragraph({
-    Title = "Bem-vindo ao KLS HUB",
-    Desc = "Este script está utilizando a interface WindUI.\nVersão Beta.",
-    Image = "", -- Pode colocar um rbxassetid:// aqui se quiser
-})
+-- >> ABA: PHYSICS (Testar WalkSpeed/JumpPower Check)
+PhysicsTab:Section({ Title = "Humanoid Manipulation" })
 
-HomeTab:Button({
-    Title = "Destruir Interface",
-    Desc = "Fecha e remove o script do jogo",
-    Icon = "trash",
-    Callback = function()
-        Window:Close()
-        -- O WindUI gerencia o destroy na maioria das vezes, mas isso fecha a janela.
-    end
-})
-
--- ==========================================
--- ABA: PLAYER (Exemplos de Cheats)
--- ==========================================
-PlayerTab:Section({ Title = "Movimentação" })
-
--- Slider de Velocidade (WalkSpeed)
-local SpeedSlider = PlayerTab:Slider({
-    Title = "Velocidade (WalkSpeed)",
-    Desc = "Define a velocidade do seu personagem",
+PhysicsTab:Slider({
+    Title = "WalkSpeed Override",
+    Desc = "Teste se o servidor detecta velocidade > 16",
     Step = 1,
-    Value = {
-        Min = 16,
-        Max = 300,
-        Default = 16,
-    },
-    Callback = function(value)
-        pcall(function()
-            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
-        end)
-    end
-})
-
--- Slider de Pulo (JumpPower)
-local JumpSlider = PlayerTab:Slider({
-    Title = "Força do Pulo (JumpPower)",
-    Desc = "Define a altura do pulo",
-    Step = 1,
-    Value = {
-        Min = 50,
-        Max = 500,
-        Default = 50,
-    },
-    Callback = function(value)
-        pcall(function()
-            game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
-            game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
-        end)
-    end
-})
-
-PlayerTab:Section({ Title = "Extras" })
-
--- Exemplo de Toggle (Noclip Simples)
-local NoclipConnection
-PlayerTab:Toggle({
-    Title = "Noclip",
-    Desc = "Atravessar paredes",
-    Icon = "ghost",
-    Value = false,
-    Callback = function(state)
-        local RunService = game:GetService("RunService")
-        if state then
-            NoclipConnection = RunService.Stepped:Connect(function()
-                if game.Players.LocalPlayer.Character then
-                    for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-                        if part:IsA("BasePart") and part.CanCollide == true then
-                            part.CanCollide = false
-                        end
-                    end
-                end
-            end)
-            WindUI:Notify({ Title = "Noclip", Content = "Ativado!", Duration = 2, Icon = "check" })
-        else
-            if NoclipConnection then NoclipConnection:Disconnect() end
-            WindUI:Notify({ Title = "Noclip", Content = "Desativado!", Duration = 2, Icon = "x" })
+    Value = { Min = 16, Max = 100, Default = 16 },
+    Callback = function(v)
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
         end
     end
 })
 
--- ==========================================
--- ABA: VISUAIS (Placeholder)
--- ==========================================
-VisualsTab:Section({ Title = "ESP & Render" })
+PhysicsTab:Slider({
+    Title = "JumpPower Override",
+    Desc = "Teste se o servidor detecta pulo > 50",
+    Step = 1,
+    Value = { Min = 50, Max = 200, Default = 50 },
+    Callback = function(v)
+        if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+            game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+        end
+    end
+})
+
+PhysicsTab:Section({ Title = "Collision" })
+
+PhysicsTab:Toggle({
+    Title = "Noclip State",
+    Desc = "Teste a detecção de colisão de paredes",
+    Icon = "ghost",
+    Value = false,
+    Callback = function(state)
+        -- Simples noclip loop
+        _G.Noclip = state
+        game:GetService("RunService").Stepped:Connect(function()
+            if _G.Noclip and game.Players.LocalPlayer.Character then
+                for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                    if part:IsA("BasePart") and part.CanCollide then
+                        part.CanCollide = false
+                    end
+                end
+            end
+        end)
+        
+        local status = state and "Ativado" or "Desativado"
+        WindUI:Notify({ Title = "Physics", Content = "Noclip: " .. status, Icon = "info" })
+    end
+})
+
+-- >> ABA: VISUALS (Testar ESP/Renderização)
+VisualsTab:Section({ Title = "Render Core" })
+
+VisualsTab:Button({
+    Title = "Force Lag (Stress Test)",
+    Desc = "Gera partículas para testar queda de FPS",
+    Icon = "activity",
+    Callback = function()
+        for i = 1, 10 do
+            local p = Instance.new("Explosion", game.Workspace)
+            p.Position = game.Players.LocalPlayer.Character.HumanoidRootPart.Position
+        end
+    end
+})
 
 VisualsTab:Toggle({
-    Title = "Ativar ESP (Exemplo)",
-    Desc = "Mostra jogadores através da parede (Lógica não inclusa)",
+    Title = "Highlight ESP",
+    Desc = "Simula ESP para testar proteções de CoreGui",
+    Value = false,
     Callback = function(state)
-        print("Estado do ESP:", state)
-        -- Aqui você colocaria o código do seu ESP
+        -- Lógica de highlight simples para dev
+        if state then
+            for _, plr in pairs(game.Players:GetPlayers()) do
+                if plr ~= game.Players.LocalPlayer and plr.Character then
+                    local hl = Instance.new("Highlight")
+                    hl.Name = "DevESP"
+                    hl.FillColor = Color3.fromRGB(255, 0, 0)
+                    hl.OutlineColor = Color3.fromRGB(255, 255, 255)
+                    hl.Parent = plr.Character
+                end
+            end
+        else
+            for _, plr in pairs(game.Players:GetPlayers()) do
+                if plr.Character and plr.Character:FindFirstChild("DevESP") then
+                    plr.Character.DevESP:Destroy()
+                end
+            end
+        end
     end
 })
 
-VisualsTab:Slider({
-    Title = "FOV (Campo de Visão)",
-    Step = 1,
-    Value = { Min = 70, Max = 120, Default = 70 },
-    Callback = function(v)
-        game.Workspace.CurrentCamera.FieldOfView = v
+-- >> ABA: SETTINGS (Controle da UI)
+SettingsTab:Section({ Title = "UI Management" })
+
+SettingsTab:Button({
+    Title = "Recarregar Tema KLS",
+    Icon = "rotate-ccw",
+    Callback = function()
+        WindUI:SetTheme("KLS Dark")
     end
 })
 
--- ==========================================
--- ABA: CONFIGURAÇÕES (Theme Manager)
--- ==========================================
-SettingsTab:Section({ Title = "Interface" })
-
--- Dropdown para selecionar Temas
-local themes = WindUI:GetThemes() -- Pega a lista de temas da Lib
-SettingsTab:Dropdown({
-    Title = "Selecionar Tema",
-    Desc = "Mude as cores do KLS HUB",
-    Values = themes,
-    Multi = false,
-    Default = "Dark",
-    Callback = function(themeName)
-        WindUI:SetTheme(themeName)
-    end
-})
-
--- Keybind para abrir/fechar a UI
 SettingsTab:Keybind({
-    Title = "Tecla do Menu",
-    Desc = "Tecla para esconder/mostrar a UI",
-    Value = "RightControl", -- Padrão Right Control
+    Title = "Menu Toggle",
+    Desc = "Tecla para ocultar o painel",
+    Value = "RightControl",
     Callback = function(key)
         Window:SetToggleKey(Enum.KeyCode[key])
     end
 })
 
--- Botão para adicionar um tema customizado (Exemplo do código que você mandou)
-SettingsTab:Button({
-    Title = "Carregar Tema Customizado (KLS)",
-    Callback = function()
-        WindUI:AddTheme({
-            Name = "KLS Theme",
-            Accent = Color3.fromHex("#18181b"),
-            Background = Color3.fromHex("#101010"),
-            Text = Color3.fromHex("#FFFFFF"),
-            Outline = Color3.fromHex("#FFFFFF"),
-            Placeholder = Color3.fromHex("#7a7a7a"),
-            Button = Color3.fromHex("#52525b"),
-            Icon = Color3.fromHex("#a1a1aa"),
-            WindowShadow = Color3.fromHex("000000"),
-        })
-        WindUI:SetTheme("KLS Theme")
-        WindUI:Notify({ Title = "Tema", Content = "Tema KLS Carregado!", Icon = "paint-brush" })
-    end
-})
-
-
--- 5. Notificação de Carregamento
+-- Notificação Inicial
 WindUI:Notify({
-    Title = "KLS HUB Carregado!",
-    Content = "Bem-vindo ao script. Divirta-se!",
-    Duration = 5,
-    Icon = "check-circle",
+    Title = "Dev Mode Active",
+    Content = "KLS HUB carregado. Monitorando logs...",
+    Duration = 4,
+    Icon = "terminal",
 })
