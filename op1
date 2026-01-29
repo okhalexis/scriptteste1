@@ -1,114 +1,201 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/okhalexis/source/refs/heads/main/trse1')))()
+--[[
+    KLS HUB - Powered by WindUI
+    Criado com base na documentação fornecida.
+]]
 
---------------------------------------------------------------------------------
--- 1. CONFIGURAÇÃO DA JANELA (HUB)
---------------------------------------------------------------------------------
-local Window = OrionLib:MakeWindow({
-    Name = "Khalexis Hub V2.0", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "KhalexisConfig",
-    IntroEnabled = true,
-    IntroText = "Khalexis Hub V2.0"
+-- 1. Carregar a Library (Latest Version)
+local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
+
+-- 2. Configurações Iniciais da UI
+WindUI:SetNotificationLower(true) -- Notificações na parte inferior
+
+-- 3. Criar a Janela Principal
+local Window = WindUI:CreateWindow({
+    Title = "KLS HUB", -- Nome do Hub
+    Icon = "swords", -- Ícone (Lucide Icons)
+    Author = "KLS Team",
+    Folder = "KLSHub", -- Pasta para salvar configs
+    
+    Size = UDim2.fromOffset(580, 460),
+    Transparent = true, -- Fundo translúcido
+    Theme = "Dark", -- Tema padrão
+    SideBarWidth = 170,
+    HideSearchBar = false,
+    Resizable = true,
 })
 
---------------------------------------------------------------------------------
--- 2. CRIANDO AS CATEGORIAS (VAZIAS)
---------------------------------------------------------------------------------
+-- 4. Criando as Abas (Tabs)
+local HomeTab = Window:Tab({ Title = "Início", Icon = "home" })
+local PlayerTab = Window:Tab({ Title = "Player", Icon = "user" })
+local VisualsTab = Window:Tab({ Title = "Visuais", Icon = "eye" })
+local SettingsTab = Window:Tab({ Title = "Configurações", Icon = "settings" })
 
--- Categoria 1: Steal a Brainrot
-local Tab1 = Window:MakeTab({
-    Name = "Steal a Brainrot",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
+-- ==========================================
+-- ABA: INÍCIO (HOME)
+-- ==========================================
+HomeTab:Section({ Title = "Informações" })
+
+HomeTab:Paragraph({
+    Title = "Bem-vindo ao KLS HUB",
+    Desc = "Este script está utilizando a interface WindUI.\nVersão Beta.",
+    Image = "", -- Pode colocar um rbxassetid:// aqui se quiser
 })
 
--- Categoria 2: 99 Nights in the Florest
-local Tab2 = Window:MakeTab({
-    Name = "99 Nights in the Florest",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
---------------------------------------------------------------------------------
--- 3. INJEÇÃO DA TEXTBOX (FUNDO PRETO ABSOLUTO)
---------------------------------------------------------------------------------
-local function InjectSearchBar()
-    task.wait(0.5) 
-    
-    local CoreGui = game:GetService("CoreGui")
-    local OrionUI = CoreGui:FindFirstChild("Orion")
-    
-    if not OrionUI then return end
-
-    local TabContainer = nil
-    
-    -- Procura o container das abas
-    for _, v in pairs(OrionUI:GetDescendants()) do
-        if v:IsA("TextButton") and v:FindFirstChild("TabLabel") then
-            TabContainer = v.Parent
-            break
-        end
+HomeTab:Button({
+    Title = "Destruir Interface",
+    Desc = "Fecha e remove o script do jogo",
+    Icon = "trash",
+    Callback = function()
+        Window:Close()
+        -- O WindUI gerencia o destroy na maioria das vezes, mas isso fecha a janela.
     end
+})
 
-    if TabContainer then
-        local SearchContainer = Instance.new("Frame")
-        SearchContainer.Name = "SearchContainer"
-        SearchContainer.BackgroundTransparency = 1
-        SearchContainer.Size = UDim2.new(1, -24, 0, 35)
-        SearchContainer.Parent = TabContainer
-        SearchContainer.LayoutOrder = -5 -- Força a ficar no topo
+-- ==========================================
+-- ABA: PLAYER (Exemplos de Cheats)
+-- ==========================================
+PlayerTab:Section({ Title = "Movimentação" })
 
-        local Padding = Instance.new("UIPadding")
-        Padding.PaddingTop = UDim.new(0, 5)
-        Padding.PaddingBottom = UDim.new(0, 5)
-        Padding.PaddingLeft = UDim.new(0, 5)
-        Padding.Parent = SearchContainer
-
-        -- TEXTBOX
-        local RealTextBox = Instance.new("TextBox")
-        RealTextBox.Name = "SearchBoxInput"
-        RealTextBox.Parent = SearchContainer
-        RealTextBox.Size = UDim2.new(1, 0, 1, 0)
-        
-        -- >>> MUDANÇA AQUI: PRETO ABSOLUTO <<<
-        RealTextBox.BackgroundColor3 = Color3.fromRGB(0, 0, 0) 
-        
-        RealTextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-        RealTextBox.PlaceholderText = "Pesquisa"
-        RealTextBox.PlaceholderColor3 = Color3.fromRGB(150, 150, 150)
-        RealTextBox.Text = ""
-        RealTextBox.Font = Enum.Font.GothamBold
-        RealTextBox.TextSize = 14
-        
-        -- Arredondamento
-        local UICorner = Instance.new("UICorner")
-        UICorner.CornerRadius = UDim.new(0, 16)
-        UICorner.Parent = RealTextBox
-        
-        -- Borda Cinza Escura para destacar o preto
-        local UIStroke = Instance.new("UIStroke")
-        UIStroke.Parent = RealTextBox
-        UIStroke.Color = Color3.fromRGB(45, 45, 45) 
-        UIStroke.Thickness = 1
-        UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-        -- Lógica de Pesquisa
-        RealTextBox:GetPropertyChangedSignal("Text"):Connect(function()
-            local input = RealTextBox.Text:lower()
-            for _, child in pairs(TabContainer:GetChildren()) do
-                if child:IsA("TextButton") and child:FindFirstChild("TabLabel") then
-                    local tabName = child.TabLabel.Text:lower()
-                    if input == "" or string.sub(tabName, 1, #input) == input then
-                        child.Visible = true
-                    else
-                        child.Visible = false
-                    end
-                end
-            end
+-- Slider de Velocidade (WalkSpeed)
+local SpeedSlider = PlayerTab:Slider({
+    Title = "Velocidade (WalkSpeed)",
+    Desc = "Define a velocidade do seu personagem",
+    Step = 1,
+    Value = {
+        Min = 16,
+        Max = 300,
+        Default = 16,
+    },
+    Callback = function(value)
+        pcall(function()
+            game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
         end)
     end
-end
+})
 
-OrionLib:Init()
-coroutine.wrap(InjectSearchBar)()
+-- Slider de Pulo (JumpPower)
+local JumpSlider = PlayerTab:Slider({
+    Title = "Força do Pulo (JumpPower)",
+    Desc = "Define a altura do pulo",
+    Step = 1,
+    Value = {
+        Min = 50,
+        Max = 500,
+        Default = 50,
+    },
+    Callback = function(value)
+        pcall(function()
+            game.Players.LocalPlayer.Character.Humanoid.UseJumpPower = true
+            game.Players.LocalPlayer.Character.Humanoid.JumpPower = value
+        end)
+    end
+})
+
+PlayerTab:Section({ Title = "Extras" })
+
+-- Exemplo de Toggle (Noclip Simples)
+local NoclipConnection
+PlayerTab:Toggle({
+    Title = "Noclip",
+    Desc = "Atravessar paredes",
+    Icon = "ghost",
+    Value = false,
+    Callback = function(state)
+        local RunService = game:GetService("RunService")
+        if state then
+            NoclipConnection = RunService.Stepped:Connect(function()
+                if game.Players.LocalPlayer.Character then
+                    for _, part in pairs(game.Players.LocalPlayer.Character:GetDescendants()) do
+                        if part:IsA("BasePart") and part.CanCollide == true then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            end)
+            WindUI:Notify({ Title = "Noclip", Content = "Ativado!", Duration = 2, Icon = "check" })
+        else
+            if NoclipConnection then NoclipConnection:Disconnect() end
+            WindUI:Notify({ Title = "Noclip", Content = "Desativado!", Duration = 2, Icon = "x" })
+        end
+    end
+})
+
+-- ==========================================
+-- ABA: VISUAIS (Placeholder)
+-- ==========================================
+VisualsTab:Section({ Title = "ESP & Render" })
+
+VisualsTab:Toggle({
+    Title = "Ativar ESP (Exemplo)",
+    Desc = "Mostra jogadores através da parede (Lógica não inclusa)",
+    Callback = function(state)
+        print("Estado do ESP:", state)
+        -- Aqui você colocaria o código do seu ESP
+    end
+})
+
+VisualsTab:Slider({
+    Title = "FOV (Campo de Visão)",
+    Step = 1,
+    Value = { Min = 70, Max = 120, Default = 70 },
+    Callback = function(v)
+        game.Workspace.CurrentCamera.FieldOfView = v
+    end
+})
+
+-- ==========================================
+-- ABA: CONFIGURAÇÕES (Theme Manager)
+-- ==========================================
+SettingsTab:Section({ Title = "Interface" })
+
+-- Dropdown para selecionar Temas
+local themes = WindUI:GetThemes() -- Pega a lista de temas da Lib
+SettingsTab:Dropdown({
+    Title = "Selecionar Tema",
+    Desc = "Mude as cores do KLS HUB",
+    Values = themes,
+    Multi = false,
+    Default = "Dark",
+    Callback = function(themeName)
+        WindUI:SetTheme(themeName)
+    end
+})
+
+-- Keybind para abrir/fechar a UI
+SettingsTab:Keybind({
+    Title = "Tecla do Menu",
+    Desc = "Tecla para esconder/mostrar a UI",
+    Value = "RightControl", -- Padrão Right Control
+    Callback = function(key)
+        Window:SetToggleKey(Enum.KeyCode[key])
+    end
+})
+
+-- Botão para adicionar um tema customizado (Exemplo do código que você mandou)
+SettingsTab:Button({
+    Title = "Carregar Tema Customizado (KLS)",
+    Callback = function()
+        WindUI:AddTheme({
+            Name = "KLS Theme",
+            Accent = Color3.fromHex("#18181b"),
+            Background = Color3.fromHex("#101010"),
+            Text = Color3.fromHex("#FFFFFF"),
+            Outline = Color3.fromHex("#FFFFFF"),
+            Placeholder = Color3.fromHex("#7a7a7a"),
+            Button = Color3.fromHex("#52525b"),
+            Icon = Color3.fromHex("#a1a1aa"),
+            WindowShadow = Color3.fromHex("000000"),
+        })
+        WindUI:SetTheme("KLS Theme")
+        WindUI:Notify({ Title = "Tema", Content = "Tema KLS Carregado!", Icon = "paint-brush" })
+    end
+})
+
+
+-- 5. Notificação de Carregamento
+WindUI:Notify({
+    Title = "KLS HUB Carregado!",
+    Content = "Bem-vindo ao script. Divirta-se!",
+    Duration = 5,
+    Icon = "check-circle",
+})
